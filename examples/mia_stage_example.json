@@ -19,21 +19,38 @@
           "version": "de4b985206c86137e2ddf1fe32617f0764b73cb9",
           "uri": "https://github.com/JaneliaSciComp/mia-snippets"
         },
+        "environment": {
+          "name": "pixi.lock",
+          "uri": "https://github.com/JaneliaSciComp/mia-snippets/blob/de4b985206c86137e2ddf1fe32617f0764b73cb9/harness/pixi.lock",
+          "checksum": "sha256:80d86d8031892d3b3c606f80f984b6da39fd82bc53813683e350b9bc3a791beb"
+        },
+        "modules": [
+          { "name": "tiff-zip-glob-rgb", "version": "fc16a01cd2731655e34804e920722e747e3f4826",
+            "uri": "https://github.com/JaneliaSciComp/mia-snippets" }
+        ],
         "parameters": {
-          "levels_key": "p128-l1-2",
-          "plan_digest": "9e22de8b0bbf93d4843841f1644cf84f9a132f89ecd31a4f83ab521c7e64b748"
+          "plan": { "seed": 0, "patch": 128, "levels": [1, 2], "samples": { "train": 16, "val": 4, "test": 4 } },
+          "voxel_size": { "z": { "nm": 1.0, "source": "synthetic" }, "y": { "nm": 106.0, "source": "record" },
+                          "x": { "nm": 106.0, "source": "record" } }
         },
         "inputs": [
+          { "id": "zenodo-6400327-deepbacs-ecoli-stationary-brightfield", "name": "record" },
           {
             "uri": "https://zenodo.org/records/6400327/files/DeepBacs_Data_Segmentation_Ecoli_stationary_phase.zip",
             "name": "train/brightfield/*.tif"
-          },
-          {
-            "uri": "https://zenodo.org/records/6400327/files/DeepBacs_Data_Segmentation_Ecoli_stationary_phase.zip",
-            "name": "train/masks/*.tif"
           }
         ],
+        "outputs": [{ "id": "27f07509df1d86c8", "name": "artifact" }],
+        "started": "2026-11-02T17:58:40Z",
         "ended": "2026-11-02T18:04:11Z"
+      },
+      {
+        "name": "check-stage",
+        "software": { "name": "mia-harness", "version": "de4b985206c86137e2ddf1fe32617f0764b73cb9" },
+        "parameters": { "schemas_commit": "0.6" },
+        "status": "ok",
+        "started": "2026-11-02T18:04:12Z",
+        "ended": "2026-11-02T18:04:20Z"
       }
     ]
   }
