@@ -1,0 +1,151 @@
+{
+  "attributes": {
+    "ome": { },
+    "provenance:steps": [
+      {
+        "name": "[Collect] Collect Metadata from Yokogawa",
+        "category": "Conversion",
+        "software": {
+          "name": "ihb-converters",
+          "version": "1.1.1",
+          "entry_point": "ihb_converters.tasks.collect_metadata_from_yokogawa",
+          "uri": "https://git.example.org/ihb-converters"
+        },
+        "parameters": {
+          "zarr_dir": "s3://bucket/project",
+          "acquisition_path": "s3://bucket/acquisitions/plate_01",
+          "plate_name": null,
+          "condition_table_path": null,
+          "overwrite": true
+        },
+        "inputs": [
+          {
+            "uri": "s3://bucket/acquisitions/plate_01",
+            "name": "acquisition"
+          }
+        ],
+        "started": "2026-11-04T14:52:15+00:00",
+        "ended": "2026-11-04T14:53:12+00:00"
+      },
+      {
+        "name": "[Convert] Convert Image Collection to OME-Zarr",
+        "category": "Conversion",
+        "software": {
+          "name": "ihb-converters",
+          "version": "1.1.1",
+          "entry_point": "ihb_converters.tasks.convert_image_collection",
+          "uri": "https://git.example.org/ihb-converters"
+        },
+        "parameters": {
+          "zarr_url": "s3://bucket/project/plate_01.zarr/A/07/0",
+          "overwrite": true
+        },
+        "inputs": [
+          {
+            "uri": "s3://bucket/project/plate_01.zarr",
+            "name": "plate"
+          }
+        ],
+        "started": "2026-11-04T14:53:37+00:00",
+        "ended": "2026-11-04T14:57:25+00:00"
+      },
+      {
+        "name": "Illumination Correction",
+        "category": "Image Processing",
+        "software": {
+          "name": "fractal-ihb-tasks",
+          "version": "1.0.0",
+          "entry_point": "fractal_ihb_tasks.tasks.illumination_correction_task",
+          "uri": "https://git.example.org/fractal-ihb-tasks"
+        },
+        "parameters": {
+          "zarr_url": "s3://bucket/project/plate_01.zarr/A/07/0",
+          "darkfield": {
+            "directory": null,
+            "filename_template": "*_CH{channel_index:02d}.tif",
+            "channel_index_start": 1
+          },
+          "flatfield": {
+            "directory": null,
+            "filename_template": "*_CH{channel_index:02d}.tif",
+            "channel_index_start": 1
+          },
+          "skip_missing": false,
+          "overwrite": true,
+          "delete_original": true
+        },
+        "inputs": [
+          {
+            "path": "A/07/0",
+            "uri": "s3://bucket/project/plate_01.zarr/A/07/0",
+            "name": "image"
+          }
+        ],
+        "started": "2026-11-04T14:57:47+00:00",
+        "ended": "2026-11-04T15:00:50+00:00"
+      },
+      {
+        "name": "Montage",
+        "category": "Montage",
+        "software": {
+          "name": "fractal-ihb-tasks",
+          "version": "1.0.0",
+          "entry_point": "fractal_ihb_tasks.tasks.montage_task",
+          "uri": "https://git.example.org/fractal-ihb-tasks"
+        },
+        "parameters": {
+          "zarr_url": "s3://bucket/project/plate_01.zarr/A/07/0_illumination_corrected",
+          "montage_method": "overwrite",
+          "overwrite": true,
+          "delete_original": true
+        },
+        "inputs": [
+          {
+            "path": "A/07/0_illumination_corrected",
+            "uri": "s3://bucket/project/plate_01.zarr/A/07/0_illumination_corrected",
+            "name": "image"
+          }
+        ],
+        "started": "2026-11-04T15:01:34+00:00",
+        "ended": "2026-11-04T15:03:54+00:00"
+      },
+      {
+        "name": "Channel Alignment",
+        "category": "Image Processing",
+        "software": {
+          "name": "fractal-ihb-tasks",
+          "version": "1.0.0",
+          "entry_point": "fractal_ihb_tasks.tasks.channel_alignment_task",
+          "uri": "https://git.example.org/fractal-ihb-tasks"
+        },
+        "parameters": {
+          "zarr_url": "s3://bucket/project/plate_01.zarr/A/07/0_illumination_corrected_montage",
+          "channel_shifts": null,
+          "interpolate": false,
+          "overwrite": true,
+          "delete_original": true
+        },
+        "inputs": [
+          {
+            "path": "A/07/0_illumination_corrected_montage",
+            "uri": "s3://bucket/project/plate_01.zarr/A/07/0_illumination_corrected_montage",
+            "name": "image"
+          }
+        ],
+        "started": "2026-11-04T15:04:49+00:00",
+        "ended": "2026-11-04T15:07:36+00:00"
+      }
+    ],
+    "zarr_conventions": [
+      {
+        "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
+        "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
+        "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
+        "name": "provenance:",
+        "description": "The processing steps that produced or modified this node"
+      }
+    ]
+  },
+  "zarr_format": 3,
+  "node_type": "group"
+}
