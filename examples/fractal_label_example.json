@@ -5,8 +5,8 @@
     "zarr_conventions": [
       {
         "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
-        "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
-        "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
+        "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.2.0/schema.json",
+        "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.2.0/README.md",
         "name": "provenance:",
         "description": "The processing steps that produced or modified this node"
       }
@@ -19,6 +19,9 @@
           "version": "2.1.0",
           "uri": "https://pypi.org/project/fractal-tasks-core/2.1.0"
         },
+        "operations": [
+          { "iri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
+        ],
         "parameters": {
           "channel": { "mode": "index", "identifier": "0" },
           "output_label_name": "nuclei",
@@ -28,9 +31,19 @@
             "post_process": [{ "type": "Size Filter", "min_size": 20 }]
           }
         },
-        "inputs": [{ "path": "B/03/0", "name": "image" }],
+        "inputs": [
+          {
+            "path": "B/03/0",
+            "name": "image",
+            "type": { "iri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
+          }
+        ],
         "outputs": [
-          { "path": "B/03/0/labels/nuclei", "name": "label image" },
+          {
+            "path": "B/03/0/labels/nuclei",
+            "name": "label image",
+            "type": { "iri": "http://purl.obolibrary.org/obo/OBI_0003360", "label": "image segmentation map", "ontology": "obi" }
+          },
           { "path": "B/03/0/tables/nuclei_masking_ROI_table", "name": "masking ROI table" }
         ],
         "started": "2026-11-04T11:55:00.431+01:00",

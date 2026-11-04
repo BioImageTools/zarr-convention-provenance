@@ -2,8 +2,8 @@
 
 - **UUID**: 0d4ef942-0f74-4187-ae72-016ddf083fe1
 - **Name**: provenance:
-- **Schema URL**: "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json"
-- **Spec URL**: "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md"
+- **Schema URL**: "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.2.0/schema.json"
+- **Spec URL**: "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.2.0/README.md"
 - **Scope**: Array, Group
 - **Extension Maturity Classification**: Proposal
 - **Owner**: @BioImageTools/zarr-convention-mantainers
@@ -15,10 +15,11 @@ with which parameters, on which inputs, writing which outputs, and when. Propert
 prefix at the root `attributes` level, following the
 [Zarr Conventions Specification](https://github.com/zarr-conventions/zarr-conventions-spec).
 
-Version 0.1 contains only what every surveyed producer already records (see
-[Survey](#survey-of-existing-practice)). It says nothing about the image itself: axes, transforms, pyramids and
-labels belong to [OME-Zarr](https://ngff.openmicroscopy.org/), and licensing to the
-[license convention](https://github.com/clbarnes/zarr-convention-license). Every object here allows extra keys,
+Version 0.1 contained only what every surveyed producer already records (see
+[Survey](#survey-of-existing-practice)). Version 0.2 adds optional, nice-to-have [ontology terms](#ontology-term-object) for the
+kind of operation a step performed and the type and format of the data it read and wrote. The convention says
+nothing about the image itself: axes, transforms, pyramids and labels belong to
+[OME-Zarr](https://ngff.openmicroscopy.org/), and licensing to the [license convention](https://github.com/clbarnes/zarr-convention-license). Every object here allows extra keys,
 so tools and later versions can add more without breaking validation.
 
 It merges two drafts from the November 2026 BioImageTools hackathon: this repository and
@@ -53,8 +54,8 @@ The convention must be registered in `zarr_conventions`:
   "zarr_conventions": [
     {
       "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
-      "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
-      "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
+      "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.2.0/schema.json",
+      "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.2.0/README.md",
       "name": "provenance:",
       "description": "The processing steps that produced or modified this node"
     }
@@ -87,9 +88,24 @@ All properties are placed at the root `attributes` level using the key-prefixed 
       {
         "name": "Threshold Segmentation",
         "software": { "name": "fractal-tasks-core", "version": "2.1.0" },
+        "operations": [
+          { "iri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
+        ],
         "parameters": { "segmentation_method": { "method": "Otsu" } },
-        "inputs": [{ "path": "B/03/0", "name": "image" }],
-        "outputs": [{ "path": "B/03/0/labels/nuclei", "name": "label image" }],
+        "inputs": [
+          {
+            "path": "B/03/0",
+            "name": "image",
+            "type": { "iri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
+          }
+        ],
+        "outputs": [
+          {
+            "path": "B/03/0/labels/nuclei",
+            "name": "label image",
+            "type": { "iri": "http://purl.obolibrary.org/obo/OBI_0003360", "label": "image segmentation map", "ontology": "obi" }
+          }
+        ],
         "started": "2026-11-04T11:55:00+01:00",
         "ended": "2026-11-04T11:55:02+01:00"
       }
@@ -117,6 +133,7 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 | software    | [Software Object](#software-object)                | **REQUIRED**. The software that performed the step.             |
 | name        | string                                             | What the step did, e.g. `Image conversion`.                      |
 | description | string                                             | Free text about the step.                                       |
+| operations  | \[[Ontology Term Object](#ontology-term-object)]   | What kind of operation the step performed, e.g. segmentation.   |
 | parameters  | object                                             | Parameters the software ran with. Free-form.                    |
 | inputs      | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                             |
 | outputs     | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                     |
@@ -145,7 +162,38 @@ At least one of `path`, `uri` or `id` is **REQUIRED**.
 | uri        | string | URI of data outside this hierarchy.                                          |
 | id         | string | Identifier of the data in a catalogue or archive, e.g. a UUID or accession.  |
 | name       | string | Human-readable name or role of the data, e.g. `image`, `label image`.        |
+| type       | [Ontology Term Object](#ontology-term-object) | What kind of data this is, e.g. an image or a segmentation map. |
+| format     | [Ontology Term Object](#ontology-term-object) | The file or storage format, e.g. Zarr or OME-TIFF.             |
 | checksum   | string | `<algorithm>:<lowercase hex digest>`, e.g. `sha256:9f86d0…`.                  |
+
+### Ontology Term Object
+
+A term from a published ontology, so that readers can find, for example, every segmentation step or every label
+image without knowing each tool's own step names. Terms can be looked up in the
+[EMBL-EBI Ontology Lookup Service (OLS)](https://www.ebi.ac.uk/ols4/).
+
+Ontology terms are nice-to-have: `operations`, `type` and `format` are all optional, and so is every field of a
+term. A writer that only knows a label can record just the label and add the IRI later.
+
+| Field Name | Type   | Description                                                                                   |
+| ---------- | ------ | --------------------------------------------------------------------------------------------- |
+| iri        | string | Full IRI of the term, e.g. `http://edamontology.org/operation_3443`.                           |
+| label      | string | The term's label in its ontology, e.g. `Image analysis`.                                       |
+| ontology   | string | The ontology's id in OLS, e.g. `edam`, `obi`, `ncit`.                                          |
+
+When an identifier is given, it should be the full IRI rather than a compact identifier (CURIE), because
+prefixes are not used consistently: OLS itself shows the same EDAM term as `EDAM:operation_3434` and
+`EDAM_operation:3434`. If `iri` is present it must be a valid IRI.
+
+Any ontology may be used. These are suggested:
+
+| Where                          | Ontology and branch                                                                  | Examples                                                                                                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Step `operations`              | [EDAM](https://www.ebi.ac.uk/ols4/ontologies/edam) operation, then [OBI](https://www.ebi.ac.uk/ols4/ontologies/obi) or [NCIT](https://www.ebi.ac.uk/ols4/ontologies/ncit) | [Image analysis](http://edamontology.org/operation_3443), [Data formatting](http://edamontology.org/operation_0335), [Feature extraction](http://edamontology.org/operation_3937), [image segmentation](http://purl.obolibrary.org/obo/OBI_0003918) (OBI), [Image Registration](http://purl.obolibrary.org/obo/NCIT_C80145) (NCIT) |
+| Data reference `type`          | EDAM data, then OBI                                                                  | [Image](http://edamontology.org/data_2968), [image segmentation map](http://purl.obolibrary.org/obo/OBI_0003360) (OBI)                                                                          |
+| Data reference `format`        | EDAM format                                                                          | [Zarr](http://edamontology.org/format_3915), [OME-TIFF](http://edamontology.org/format_3727), [TIFF](http://edamontology.org/format_3591)                                                       |
+
+A step MAY list several operations, for example a general EDAM term and a more specific OBI term.
 
 ### Extending
 
@@ -157,6 +205,9 @@ Every object allows additional properties. Tools MAY add their own keys, prefera
 The version is part of the schema and spec URLs and follows semantic versioning: patch for wording, minor for
 new optional fields, major for incompatible changes. While the major version is `0`, minor versions may also
 be incompatible.
+
+- **0.2.0**: optional ontology terms: step `operations`, data reference `type` and `format`.
+- **0.1.0**: first version.
 
 ## Survey of existing practice
 
@@ -188,8 +239,6 @@ version, and can be written today as an extra key.
   [BioImage Archive MIFA model](https://www.ebi.ac.uk/bioimage-archive/mifa-model-reference/) as vocabulary
   (working group).
 - **Scripts, logs and fuller records**, e.g. a Workflow Run RO-Crate (working group).
-- **Tags and ontology**: high-level operation terms such as `segmentation`, and the ontology they come from
-  (working group).
 - **Node identity and verification**: a recipe hash over inputs and parameters, and the result of checks run on
   the written node (MIA).
 
