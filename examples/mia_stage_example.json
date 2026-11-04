@@ -1,0 +1,40 @@
+{
+  "zarr_format": 3,
+  "node_type": "group",
+  "attributes": {
+    "zarr_conventions": [
+      {
+        "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
+        "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
+        "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
+        "name": "provenance:",
+        "description": "The processing steps that produced or modified this node"
+      }
+    ],
+    "provenance:steps": [
+      {
+        "name": "Sparse OME-Zarr staging",
+        "software": {
+          "name": "mia-harness",
+          "version": "de4b985206c86137e2ddf1fe32617f0764b73cb9",
+          "uri": "https://github.com/JaneliaSciComp/mia-snippets"
+        },
+        "parameters": {
+          "levels_key": "p128-l1-2",
+          "plan_digest": "9e22de8b0bbf93d4843841f1644cf84f9a132f89ecd31a4f83ab521c7e64b748"
+        },
+        "inputs": [
+          {
+            "uri": "https://zenodo.org/records/6400327/files/DeepBacs_Data_Segmentation_Ecoli_stationary_phase.zip",
+            "name": "train/brightfield/*.tif"
+          },
+          {
+            "uri": "https://zenodo.org/records/6400327/files/DeepBacs_Data_Segmentation_Ecoli_stationary_phase.zip",
+            "name": "train/masks/*.tif"
+          }
+        ],
+        "ended": "2026-11-02T18:04:11Z"
+      }
+    ]
+  }
+}

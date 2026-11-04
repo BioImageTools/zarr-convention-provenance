@@ -1,44 +1,48 @@
 # Provenance Convention Metadata
 
 - **UUID**: 0d4ef942-0f74-4187-ae72-016ddf083fe1
-- **Name**: Provenance
-- **Schema URL**: "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v1/schema.json"
-- **Spec URL**: "https://github.com/BioImageTools/zarr-convention-provenance/blob/v1/README.md"
+- **Name**: provenance:
+- **Schema URL**: "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json"
+- **Spec URL**: "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md"
 - **Scope**: Array, Group
 - **Extension Maturity Classification**: Proposal
 - **Owner**: @BioImageTools/zarr-convention-mantainers
 
 ## Description
 
-This convention records **workflow provenance** for a Zarr node: which software produced it, from which
-inputs, under which identifiers, and how it was checked. All properties use the `provenance:` namespace prefix
-(or a nested `provenance` object) and are placed at the root `attributes` level following the
+This convention records **the processing steps that produced or modified a Zarr node**: which software ran,
+with which parameters, on which inputs, writing which outputs, and when. Properties use the `provenance:`
+prefix at the root `attributes` level, following the
 [Zarr Conventions Specification](https://github.com/zarr-conventions/zarr-conventions-spec).
 
-It deliberately says nothing about the image itself. Axes, transforms, voxel sizes, pyramids and labels belong
-to [OME-Zarr](https://ngff.openmicroscopy.org/); this convention sits beside that metadata, on the same node,
-and describes the *process* that wrote it rather than the *data* that was written.
+Version 0.1 contains only what every surveyed producer already records (see
+[Survey](#survey-of-existing-practice)). It says nothing about the image itself: axes, transforms, pyramids and
+labels belong to [OME-Zarr](https://ngff.openmicroscopy.org/), and licensing to the
+[license convention](https://github.com/clbarnes/zarr-convention-license). Every object here allows extra keys,
+so tools and later versions can add more without breaking validation.
 
-The key set is intentionally small while the convention is a proposal. The fields below are the ones every
-surveyed producer already writes in some form; candidates under discussion are listed in
-[Open questions](#open-questions).
+It merges two drafts from the November 2026 BioImageTools hackathon: this repository and
+[BioinfoTongLI/bioimage-analysis-spec](https://github.com/BioinfoTongLI/bioimage-analysis-spec) v0.1.0, whose
+step list, data references and survey it adopts.
 
 - Examples:
-  - [Convention metadata only](examples/minimal_example.json)
-  - [Key-prefixed pattern (recommended)](examples/key_prefixed_example.json)
-  - [Nested pattern](examples/nested_example.json)
+  - [Minimal: one step, software only](examples/minimal_example.json)
+  - [Format conversion, TensorSwitch (Janelia)](examples/tensorswitch_conversion_example.json)
+  - [Format conversion, BioImage Archive](examples/bia_conversion_example.json)
+  - [Sparse staging, MIA harness (Janelia)](examples/mia_stage_example.json)
+  - [Segmentation, Fractal task run from Nextflow](examples/fractal_label_example.json)
+  - [The same as a Zarr v2 `.zattrs`](examples/zarr_v2_zattrs_example.json)
 
 ## Motivation
 
-- **Reproducibility**: a node names the software and inputs that made it, so the same bytes can be produced
-  again or the difference explained.
-- **Auditability**: a reader can tell whether a store is still what its producer wrote, and whether the
-  upstream files it was derived from have changed.
-- **Tool independence**: producers today each invent their own key (`_software`, `mia`, `tensorswitch`,
-  `lmvd`, `metadata` inside `multiscales`). One namespace lets galleries, catalogues and training pipelines
-  read provenance without knowing which tool wrote the store.
-- **Composability**: the key-prefixed pattern lets other conventions and domain metadata extend the same
-  node without collisions.
+- **Provenance travels with the data.** Images are copied, converted and re-hosted; a side file or database
+  row is lost on the way, a node's own attributes are not.
+- **One place to look.** Today each tool writes its own key (`_software`, `tensorswitch`, `mia`,
+  `additional_metadata`, `processing.json`). A reader should not need to know the tool to learn what happened.
+- **Multi-step history.** A label image or table is usually several steps deep (conversion, preprocessing,
+  segmentation, measurement). An ordered list of steps keeps that history.
+- **Reproducibility.** "Which software, version and parameters made this?" is the question behind a paper, a
+  re-run, or a check that two datasets were processed the same way.
 
 ## Convention Registration
 
@@ -48,11 +52,11 @@ The convention must be registered in `zarr_conventions`:
 {
   "zarr_conventions": [
     {
-      "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v1/schema.json",
-      "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v1/README.md",
       "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
+      "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
+      "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
       "name": "provenance:",
-      "description": "Workflow provenance: the software, inputs and checks behind a Zarr node"
+      "description": "The processing steps that produced or modified this node"
     }
   ]
 }
@@ -60,116 +64,144 @@ The convention must be registered in `zarr_conventions`:
 
 ## Applicable To
 
-This convention can be used with these parts of the Zarr hierarchy:
-
 - [x] Group
 - [x] Array
 
-A producer that writes a hierarchy (for example an OME-Zarr multiscale group with arrays beneath it) SHOULD
-place the provenance on the highest node it wrote and MAY repeat or refine it on child nodes.
-
 ## Properties
 
-All properties are placed at the root `attributes` level. To avoid attribute name collisions with other
-conventions, this convention supports the following patterns:
-
-#### 1. Key-Prefixed Pattern (Recommended)
-
-Individual attributes are prefixed with `provenance:`.
+All properties are placed at the root `attributes` level using the key-prefixed pattern.
 
 **Convention metadata name**: `provenance:`
 
-| Field Name           | Type                                       | Description                                              |
-| -------------------- | ------------------------------------------ | -------------------------------------------------------- |
-| provenance:software  | [Software Object](#software-object)        | **REQUIRED**. The program that wrote this node.          |
-| provenance:inputs    | \[[Input Object](#input-object)]           | The files or stores this node was derived from.          |
+| Field Name       | Type                           | Description                                                                                 |
+| ---------------- | ------------------------------ | ------------------------------------------------------------------------------------------- |
+| provenance:steps | \[[Step Object](#step-object)] | **REQUIRED**. Steps that created or modified this node, in execution order. At least one. |
 
 **Example**:
 
 ```json
 {
   "attributes": {
-    "zarr_conventions": [{ "name": "provenance:", "spec_url": "..." }],
-    "provenance:software": { "name": "mia-harness", "version": "de4b985206c86137e2ddf1fe32617f0764b73cb9" },
-    "provenance:inputs": [{ "url": "https://zenodo.org/records/6400327/files/data.zip" }]
+    "zarr_conventions": [{ "name": "provenance:", "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1" }],
+    "provenance:steps": [
+      {
+        "name": "Threshold Segmentation",
+        "software": { "name": "fractal-tasks-core", "version": "2.1.0" },
+        "parameters": { "segmentation_method": { "method": "Otsu" } },
+        "inputs": [{ "path": "B/03/0", "name": "image" }],
+        "outputs": [{ "path": "B/03/0/labels/nuclei", "name": "label image" }],
+        "started": "2026-11-04T11:55:00+01:00",
+        "ended": "2026-11-04T11:55:02+01:00"
+      }
+    ]
   }
 }
 ```
 
-#### 2. Nested Pattern
+### provenance:steps
 
-All convention properties are nested under a single `provenance` key.
+- **Placement.** Written on the node a step created or modified. A tool that modifies a node SHOULD append its
+  step to the existing list rather than replace it.
+- **Order.** Steps are listed in the order they ran; the last is the most recent.
+- **Upstream steps.** A node MAY repeat the steps that produced its inputs, or a reader can follow `inputs` to
+  the input node and read its own `provenance:steps`.
+- **Zarr v2.** The attributes object is the content of `.zattrs`; `provenance:steps` sits beside `multiscales`
+  or `image-label`. The schema validates either a `zarr.json` document or a bare attributes object.
 
-**Convention metadata name**: `provenance`
+### Step Object
 
-| Field Name | Type                                    | Description                                       |
-| ---------- | --------------------------------------- | ------------------------------------------------- |
-| provenance | [Provenance Object](#provenance-object) | **REQUIRED**. Provenance convention properties    |
+One execution of one step: a conversion, a filter, a segmentation, a measurement.
 
-**Example**:
+| Field Name  | Type                                               | Description                                                     |
+| ----------- | -------------------------------------------------- | --------------------------------------------------------------- |
+| software    | [Software Object](#software-object)                | **REQUIRED**. The software that performed the step.             |
+| name        | string                                             | What the step did, e.g. `Image conversion`.                      |
+| description | string                                             | Free text about the step.                                       |
+| parameters  | object                                             | Parameters the software ran with. Free-form.                    |
+| inputs      | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                             |
+| outputs     | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                     |
+| started     | string                                             | When the step started: ISO 8601 date-time with time zone.       |
+| ended       | string                                             | When the step ended: ISO 8601 date-time with time zone.         |
 
-```json
-{
-  "attributes": {
-    "zarr_conventions": [{ "name": "provenance", "spec_url": "..." }],
-    "provenance": {
-      "software": { "name": "TensorSwitch", "version": "2.0.3", "url": "https://github.com/JaneliaSciComp/tensorswitch" },
-      "inputs": [{ "path": "/data/20260221_FlyID26.nd2" }]
-    }
-  }
-}
-```
-
-### Provenance Object
-
-When using the nested pattern, all properties are contained in the `provenance` object:
-
-| Field Name | Type                                | Description                                      |
-| ---------- | ----------------------------------- | ------------------------------------------------ |
-| software   | [Software Object](#software-object) | **REQUIRED**. The program that wrote this node.  |
-| inputs     | \[[Input Object](#input-object)]    | The files or stores this node was derived from.  |
+`parameters` SHOULD be recorded as the software received them, with defaults applied where the software can
+tell, so that the step can be repeated. A command-line tool MAY record its arguments as a list under one key
+(see the [BioImage Archive example](examples/bia_conversion_example.json)).
 
 ### Software Object
 
-The program that wrote the node. A version string is enough for a released tool; a commit hash is preferred
-for anything built from source.
+| Field Name | Type   | Description                                                                          |
+| ---------- | ------ | ------------------------------------------------------------------------------------ |
+| name       | string | **REQUIRED**. Name of the software, package or tool.                                 |
+| version    | string | **REQUIRED**. Released version, e.g. `2.1.0`. Use the commit if there is no release. |
+| uri        | string | Where the software can be found: repository or package page.                         |
 
-| Field Name | Type   | Description                                                             |
-| ---------- | ------ | ----------------------------------------------------------------------- |
-| name       | string | **REQUIRED**. The tool's name.                                          |
-| version    | string | **REQUIRED**. Release version or VCS commit.                            |
-| url        | string | Where the tool lives (repository or documentation).                     |
+### Data Reference Object
 
-### Input Object
+At least one of `path`, `uri` or `id` is **REQUIRED**.
 
-One source the node was derived from. Exactly one of `url` and `path` MUST be given. `path` is relative to
-the node unless it is absolute; it MUST NOT contain `.` or `..` segments.
+| Field Name | Type   | Description                                                                  |
+| ---------- | ------ | ---------------------------------------------------------------------------- |
+| path       | string | Path of a node relative to the root of this Zarr hierarchy, e.g. `B/03/0`.   |
+| uri        | string | URI of data outside this hierarchy.                                          |
+| id         | string | Identifier of the data in a catalogue or archive, e.g. a UUID or accession.  |
+| name       | string | Human-readable name or role of the data, e.g. `image`, `label image`.        |
+| checksum   | string | `<algorithm>:<lowercase hex digest>`, e.g. `sha256:9f86d0…`.                  |
 
-| Field Name | Type   | Description                                                             |
-| ---------- | ------ | ----------------------------------------------------------------------- |
-| url        | string | Remote location of the input.                                           |
-| path       | string | Local location of the input.                                            |
+### Extending
 
-## Open questions
+Every object allows additional properties. Tools MAY add their own keys, preferably prefixed
+(e.g. `fractal:task_name` inside a step), without breaking validation.
 
-Fields in use by the producers surveyed (mia-harness, TensorSwitch, the LMD ingest) that are not yet in the
-convention. Each needs a decision on whether it belongs here, in a sibling convention, or nowhere.
+## Versioning
 
-- **Input identity**: HTTP validators (etag, last-modified, size), content hashes (sha256), a sub-member of
-  an archive (`train/*.tif` inside a zip), and the reader or plugin that decoded the file.
-- **Environment**: a digest of the dependency lockfile, container image, or preset name.
-- **Node identity**: a recipe hash over all inputs and parameters, so equal recipes give equal ids.
-- **Parameters**: the free-form settings the run used, and a digest of them.
-- **Verification**: checks run on the written node, their result, time, and the checking software.
-- **Integrity**: digests of the metadata documents as left on disk.
-- **Rights and tracking**: license, and a link to the ticket or request that produced the node.
-- **Time**: when the node was written.
+The version is part of the schema and spec URLs and follows semantic versioning: patch for wording, minor for
+new optional fields, major for incompatible changes. While the major version is `0`, minor versions may also
+be incompatible.
+
+## Survey of existing practice
+
+Version 0.1 keeps the concepts every source below records, or that all but one record and the last can trivially
+add. Software name and version are required because every source has them.
+
+| Concept                   | BioImage Archive      | TensorSwitch           | MIA harness                        | Allen `processing.json`            | Fractal / Nextflow | In v0.1                   |
+| ------------------------- | --------------------- | ---------------------- | ---------------------------------- | ---------------------------------- | ------------------ | ------------------------- |
+| Software name and version | `conversion_function` | `_software`            | `harness_commit`                   | `code.name`, `code.version`        | yes                | `software` (**required**) |
+| Parameters                | `conversion_config`   | `tensorswitch`         | `plan`                             | `code.parameters`                  | yes                | `parameters`              |
+| Inputs                    | input UUID            | `lmvd.source_path`     | `derived_from`                     | `code.input_data`                  | yes                | `inputs`                  |
+| Software URL              |                       | `_software.url`        |                                    | `code.url`                         | yes                | `software.uri`            |
+| Step name                 | `provenance`          |                        |                                    | `process_type`, `name`             | yes                | `name`                    |
+| Start and end time        |                       |                        | `verification.time`                | `start_date_time`, `end_date_time` | yes                | `started`, `ended`        |
+| Outputs                   | (the node itself)     | (the node itself)      | `artifact`                         | `output_path`                      | yes                | `outputs`                 |
+
+## Deferred
+
+Recorded by some sources or asked for by the working group, but not yet agreed. Each is a candidate for a minor
+version, and can be written today as an extra key.
+
+- **Commit** separate from version (MIA, Allen, Fractal).
+- **Container or environment**: image, engine, digest; MIA's lockfile digest (MIA, Allen, Fractal).
+- **Workflow** the step ran in: name, version, uri (MIA, Allen, Fractal).
+- **Execution id**: UUID or workflow-engine task id (BIA, Fractal).
+- **Compute**: CPU, memory, GPU model and count (Allen, Fractal; working group).
+- **Models**: trained models loaded at run time (Allen, Fractal; working group).
+- **Manual steps**, e.g. proofreading, with the
+  [BioImage Archive MIFA model](https://www.ebi.ac.uk/bioimage-archive/mifa-model-reference/) as vocabulary
+  (working group).
+- **Scripts, logs and fuller records**, e.g. a Workflow Run RO-Crate (working group).
+- **Tags and ontology**: high-level operation terms such as `segmentation`, and the ontology they come from
+  (working group).
+- **Node identity and verification**: a recipe hash over inputs and parameters, and the result of checks run on
+  the written node (MIA).
+
+Out of scope: license (license convention), people and funding (dataset-level metadata such as
+[Allen biodata-schema](https://github.com/AllenInstitute/biodata-schema)), image geometry (OME-Zarr).
 
 ## Known Implementations
 
 ### Libraries and Tools
 
-_None yet._
+- **[fractal-multistep-nextflow](https://github.com/BioImageTools/fractal-multistep-nextflow)**: Nextflow
+  pipeline chaining fractal-tasks-core tasks on OME-Zarr. Status: planned. Maintainer: @BioinfoTongLI.
 
 ### Datasets Using This Convention
 
@@ -179,6 +211,8 @@ _If you implement or use this convention, please add your implementation to this
 
 ## Acknowledgements
 
-This convention follows the [zarr-conventions template](https://github.com/zarr-conventions/template),
-which is based on the [STAC extensions template](https://github.com/stac-extensions/template). The
-[thumbnails convention](https://github.com/zarr-conventions/thumbnails) served as a worked example.
+Follows the [zarr-conventions template](https://github.com/zarr-conventions/template), itself based on the
+[STAC extensions template](https://github.com/stac-extensions/template). The step model and survey come from
+[BioinfoTongLI/bioimage-analysis-spec](https://github.com/BioinfoTongLI/bioimage-analysis-spec); the survey
+draws on provenance written by the BioImage Archive, Janelia (TensorSwitch, MIA), the Allen Institute and the
+Fractal / Nextflow examples. Related: the [STAC processing extension](https://github.com/stac-extensions/processing).

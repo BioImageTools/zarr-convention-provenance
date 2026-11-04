@@ -1,11 +1,8 @@
 {
-  "$schema": "../../schema.json",
   "zarr_format": 3,
   "node_type": "group",
   "attributes": {
-    "zarr_conventions": [
-      { "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenance:" }
-    ],
-    "provenance:inputs": [{ "url": "https://example.org/data.zip" }]
+    "zarr_conventions": [{ "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenance:" }],
+    "provenance:steps": [{ "name": "Conversion", "inputs": [{ "uri": "https://example.org/data.zip" }] }]
   }
 }
