@@ -2,8 +2,8 @@
 
 - **UUID**: 0d4ef942-0f74-4187-ae72-016ddf083fe1
 - **Name**: provenance:
-- **Schema URL**: "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json"
-- **Spec URL**: "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md"
+- **Schema URL**: "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.2.0/schema.json"
+- **Spec URL**: "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.2.0/README.md"
 - **Scope**: Array, Group
 - **Extension Maturity Classification**: Proposal
 - **Owner**: @BioImageTools/zarr-convention-mantainers
@@ -15,7 +15,7 @@ with which parameters, on which inputs, writing which outputs, and when. Propert
 prefix at the root `attributes` level, following the
 [Zarr Conventions Specification](https://github.com/zarr-conventions/zarr-conventions-spec).
 
-Version 0.1 contains only what every surveyed producer already records (see
+Version 0.2 contains only what every surveyed producer already records (see
 [Survey](#survey-of-existing-practice)). It says nothing about the image itself: axes, transforms, pyramids and
 labels belong to [OME-Zarr](https://ngff.openmicroscopy.org/), and licensing to the
 [license convention](https://github.com/clbarnes/zarr-convention-license). Every object here allows extra keys,
@@ -53,8 +53,8 @@ The convention must be registered in `zarr_conventions`:
   "zarr_conventions": [
     {
       "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
-      "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
-      "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
+      "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.2.0/schema.json",
+      "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.2.0/README.md",
       "name": "provenance:",
       "description": "The processing steps that produced or modified this node"
     }
@@ -122,11 +122,18 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 | parameters  | object                                             | Parameters the software ran with. Free-form.                    |
 | inputs      | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                             |
 | outputs     | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                     |
+| environment | [Data Reference Object](#data-reference-object)    | What the software ran in: a container image, lockfile or environment file, with its checksum. |
+| modules     | \[[Software Object](#software-object)]             | Code the software loaded at run time: plugins, readers, trained models.    |
+| status      | string                                             | `ok` or `failed`.                                                |
 | started     | string                                             | When the step started: ISO 8601 date-time with time zone.       |
 | ended       | string                                             | When the step ended: ISO 8601 date-time with time zone.         |
 
 `category` groups steps across tools, so that a reader can find, say, every segmentation in a history without
 knowing each tool's step names. It is free text; a controlled vocabulary is [deferred](#deferred).
+
+A step MAY list the node it wrote among its `outputs`, to carry that node's identifier in a catalogue or its
+checksum. A node that is checked or otherwise modified after it was written gets a further step appended; a
+check step says what it found in `status`.
 
 `parameters` SHOULD be recorded as the software received them, with defaults applied where the software can
 tell, so that the step can be repeated. A command-line tool MAY record its arguments as a list under one key
@@ -188,25 +195,31 @@ add. Software name and version are required because every source has them.
 | Start and end time        |                       |                        | `verification.time`                | `start_date_time`, `end_date_time` | yes                | `started`, `ended`        |
 | Outputs                   | (the node itself)     | (the node itself)      | `artifact`                         | `output_path`                      | yes                | `outputs`                 |
 
+### Added in 0.2
+
+- `environment`: every surveyed producer runs in something it can name (a container image, a conda or pixi
+  lockfile, a Nextflow profile); a data reference with a checksum covers all of them without a new object type.
+- `modules`: code loaded at run time that is not the tool itself, such as reader plugins (MIA snippets), Fractal
+  tasks, or trained models (Allen, Fractal; the working group's "runtime modules, DL models").
+- `status`: whether the step succeeded, so a verification step can say what it found (MIA check-stage; every
+  workflow engine records an exit status).
+
 ## Deferred
 
 Recorded by some sources or asked for by the working group, but not yet agreed. Each is a candidate for a minor
 version, and can be written today as an extra key.
 
 - **Commit** separate from version (MIA, Allen, Fractal).
-- **Container or environment**: image, engine, digest; MIA's lockfile digest (MIA, Allen, Fractal).
 - **Workflow** the step ran in: name, version, uri (MIA, Allen, Fractal).
 - **Execution id**: UUID or workflow-engine task id (BIA, Fractal).
 - **Compute**: CPU, memory, GPU model and count (Allen, Fractal; working group).
-- **Models**: trained models loaded at run time (Allen, Fractal; working group).
 - **Manual steps**, e.g. proofreading, with the
   [BioImage Archive MIFA model](https://www.ebi.ac.uk/bioimage-archive/mifa-model-reference/) as vocabulary
   (working group).
 - **Scripts, logs and fuller records**, e.g. a Workflow Run RO-Crate (working group).
 - **Ontology** for `category`: a controlled vocabulary of operations such as `segmentation`, and the ontology
   it comes from (working group). `category` itself is free text.
-- **Node identity and verification**: a recipe hash over inputs and parameters, and the result of checks run on
-  the written node (MIA).
+- **Verification detail**: which checks ran and what each found, beyond `status` (MIA).
 
 Out of scope: license (license convention), people and funding (dataset-level metadata such as
 [Allen biodata-schema](https://github.com/AllenInstitute/biodata-schema)), image geometry (OME-Zarr).
