@@ -1,0 +1,14 @@
+{
+  "$schema": "../../schema.json",
+  "zarr_format": 3,
+  "node_type": "group",
+  "attributes": {
+    "zarr_conventions": [
+      { "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenance:" }
+    ],
+    "provenance:software": { "name": "example-writer", "version": "1.0.0" },
+    "provenance:inputs": [
+      { "url": "https://example.org/data.zip", "path": "data.zip" }
+    ]
+  }
+}

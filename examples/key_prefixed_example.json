@@ -1,0 +1,24 @@
+{
+  "$schema": "../schema.json",
+  "zarr_format": 3,
+  "node_type": "group",
+  "attributes": {
+    "zarr_conventions": [
+      {
+        "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v1/schema.json",
+        "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v1/README.md",
+        "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
+        "name": "provenance:",
+        "description": "Workflow provenance: the software, inputs and checks behind a Zarr node"
+      }
+    ],
+    "provenance:software": {
+      "name": "mia-harness",
+      "version": "de4b985206c86137e2ddf1fe32617f0764b73cb9",
+      "url": "https://github.com/JaneliaSciComp/mia-snippets"
+    },
+    "provenance:inputs": [
+      { "url": "https://zenodo.org/records/6400327/files/DeepBacs_Data_Segmentation_Ecoli_stationary_phase.zip" }
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v1/schema.json",
+  "title": "provenance Zarr convention",
+  "description": "Workflow provenance: the software, inputs and checks behind a Zarr node",
+  "type": "object",
+  "required": ["zarr_format", "node_type", "attributes"],
+  "properties": {
+    "zarr_format": { "type": "integer" },
+    "node_type": { "type": "string", "enum": ["array", "group"] },
+    "attributes": {
+      "type": "object",
+      "required": ["zarr_conventions"],
+      "properties": {
+        "zarr_conventions": {
+          "type": "array",
+          "contains": { "$ref": "#/$defs/convention_metadata" }
+        }
+      },
+      "oneOf": [
+        { "$ref": "#/$defs/key_prefixed" },
+        { "$ref": "#/$defs/nested" }
+      ]
+    }
+  },
+  "$defs": {
+    "convention_metadata": {
+      "type": "object",
+      "anyOf": [
+        { "required": ["schema_url"] },
+        { "required": ["spec_url"] },
+        { "required": ["uuid"] }
+      ],
+      "properties": {
+        "schema_url": {
+          "const": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v1/schema.json"
+        },
+        "spec_url": {
+          "const": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v1/README.md"
+        },
+        "uuid": { "const": "0d4ef942-0f74-4187-ae72-016ddf083fe1" },
+        "name": { "type": "string", "enum": ["provenance:", "provenance"] },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "key_prefixed": {
+      "type": "object",
+      "required": ["provenance:software"],
+      "properties": {
+        "provenance:software": { "$ref": "#/$defs/software" },
+        "provenance:inputs": { "$ref": "#/$defs/inputs" }
+      },
+      "not": { "required": ["provenance"] }
+    },
+    "nested": {
+      "type": "object",
+      "required": ["provenance"],
+      "properties": {
+        "provenance": {
+          "type": "object",
+          "required": ["software"],
+          "properties": {
+            "software": { "$ref": "#/$defs/software" },
+            "inputs": { "$ref": "#/$defs/inputs" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "not": { "required": ["provenance:software"] }
+    },
+    "software": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "additionalProperties": false
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/input" }
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "not": { "pattern": "(^|/)\\.\\.?(/|$)" }
+        }
+      },
+      "oneOf": [
+        { "required": ["url"], "not": { "required": ["path"] } },
+        { "required": ["path"], "not": { "required": ["url"] } }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

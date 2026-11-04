@@ -1,0 +1,15 @@
+{
+  "name": "zarr-convention-provenance",
+  "version": "1.0.0",
+  "description": "Workflow provenance convention for Zarr",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node test.js",
+    "validate": "node validate.js schema.json"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

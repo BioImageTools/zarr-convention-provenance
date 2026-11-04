@@ -1,0 +1,20 @@
+{
+  "$schema": "../schema.json",
+  "zarr_format": 3,
+  "node_type": "group",
+  "attributes": {
+    "zarr_conventions": [
+      {
+        "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v1/schema.json",
+        "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v1/README.md",
+        "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1",
+        "name": "provenance:",
+        "description": "Workflow provenance: the software, inputs and checks behind a Zarr node"
+      }
+    ],
+    "provenance:software": {
+      "name": "example-writer",
+      "version": "1.0.0"
+    }
+  }
+}
