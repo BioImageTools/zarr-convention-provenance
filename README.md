@@ -31,6 +31,7 @@ step list, data references and survey it adopts.
   - [Format conversion, BioImage Archive](examples/bia_conversion_example.json)
   - [Sparse staging, MIA harness (Janelia)](examples/mia_stage_example.json)
   - [Segmentation, Fractal task run from Nextflow](examples/fractal_label_example.json)
+  - [A plate image after five steps: collection, conversion, illumination correction, montage, channel alignment](examples/plate_pipeline_example.json)
   - [The same as a Zarr v2 `.zattrs`](examples/zarr_v2_zattrs_example.json)
 
 ## Motivation
