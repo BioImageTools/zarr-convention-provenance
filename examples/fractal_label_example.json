@@ -14,9 +14,11 @@
     "provenance:steps": [
       {
         "name": "Threshold Segmentation",
+        "category": "Segmentation",
         "software": {
           "name": "fractal-tasks-core",
           "version": "2.1.0",
+          "entry_point": "fractal_tasks_core.tasks.threshold_segmentation",
           "uri": "https://pypi.org/project/fractal-tasks-core/2.1.0"
         },
         "operations": [
@@ -34,6 +36,7 @@
         "inputs": [
           {
             "path": "B/03/0",
+            "uri": "s3://bucket/plate.zarr/B/03/0",
             "name": "image",
             "type": { "iri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
           }

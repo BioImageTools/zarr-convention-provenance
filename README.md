@@ -87,6 +87,7 @@ All properties are placed at the root `attributes` level using the key-prefixed 
     "provenance:steps": [
       {
         "name": "Threshold Segmentation",
+        "category": "Segmentation",
         "software": { "name": "fractal-tasks-core", "version": "2.1.0" },
         "operations": [
           { "iri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
@@ -132,6 +133,7 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 | ----------- | -------------------------------------------------- | --------------------------------------------------------------- |
 | software    | [Software Object](#software-object)                | **REQUIRED**. The software that performed the step.             |
 | name        | string                                             | What the step did, e.g. `Image conversion`.                      |
+| category    | string                                             | The kind of processing, e.g. `Segmentation`, `Conversion`.       |
 | description | string                                             | Free text about the step.                                       |
 | operations  | \[[Ontology Term Object](#ontology-term-object)]   | What kind of operation the step performed, e.g. segmentation.   |
 | parameters  | object                                             | Parameters the software ran with. Free-form.                    |
@@ -140,17 +142,25 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 | started     | string                                             | When the step started: ISO 8601 date-time with time zone.       |
 | ended       | string                                             | When the step ended: ISO 8601 date-time with time zone.         |
 
+`category` groups steps across tools, so that a reader can find, say, every segmentation in a history without
+knowing each tool's step names. It is free text; to name the operation with a term from an ontology, use
+`operations` as well.
+
 `parameters` SHOULD be recorded as the software received them, with defaults applied where the software can
 tell, so that the step can be repeated. A command-line tool MAY record its arguments as a list under one key
 (see the [BioImage Archive example](examples/bia_conversion_example.json)).
 
 ### Software Object
 
-| Field Name | Type   | Description                                                                          |
-| ---------- | ------ | ------------------------------------------------------------------------------------ |
-| name       | string | **REQUIRED**. Name of the software, package or tool.                                 |
-| version    | string | **REQUIRED**. Released version, e.g. `2.1.0`. Use the commit if there is no release. |
-| uri        | string | Where the software can be found: repository or package page.                         |
+| Field Name  | Type   | Description                                                                          |
+| ----------- | ------ | ------------------------------------------------------------------------------------ |
+| name        | string | **REQUIRED**. Name of the software, package or tool.                                 |
+| version     | string | **REQUIRED**. Released version, e.g. `2.1.0`. Use the commit if there is no release. |
+| entry_point | string | The part of the software that ran: a module, command or function.                    |
+| uri         | string | Where the software can be found: repository or package page.                         |
+
+One package often holds many tools: `entry_point` says which of them ran, e.g. the Python module
+`mypackage.tasks.segment_nuclei`, the command `mytool convert`, or a function name.
 
 ### Data Reference Object
 
@@ -159,12 +169,18 @@ At least one of `path`, `uri` or `id` is **REQUIRED**.
 | Field Name | Type   | Description                                                                  |
 | ---------- | ------ | ---------------------------------------------------------------------------- |
 | path       | string | Path of a node relative to the root of this Zarr hierarchy, e.g. `B/03/0`.   |
-| uri        | string | URI of data outside this hierarchy.                                          |
+| uri        | string | URI of data outside this hierarchy, or where a node of it was when read.     |
 | id         | string | Identifier of the data in a catalogue or archive, e.g. a UUID or accession.  |
 | name       | string | Human-readable name or role of the data, e.g. `image`, `label image`.        |
 | type       | [Ontology Term Object](#ontology-term-object) | What kind of data this is, e.g. an image or a segmentation map. |
 | format     | [Ontology Term Object](#ontology-term-object) | The file or storage format, e.g. Zarr or OME-TIFF.             |
 | checksum   | string | `<algorithm>:<lowercase hex digest>`, e.g. `sha256:9f86d0…`.                  |
+
+A node of this hierarchy is identified by its `path`, which stays right when the hierarchy is copied or moved.
+It MAY also carry a `uri`: the absolute location it had when the step ran, e.g.
+`s3://bucket/plate.zarr/B/03/0`, for a reader to trace where the data was. That `uri` is a record, not a
+reference: once the hierarchy has moved it can point to an old location, so a reader SHOULD resolve the node
+from its `path`.
 
 ### Ontology Term Object
 
@@ -206,7 +222,9 @@ The version is part of the schema and spec URLs and follows semantic versioning:
 new optional fields, major for incompatible changes. While the major version is `0`, minor versions may also
 be incompatible.
 
-- **0.2.0**: optional ontology terms: step `operations`, data reference `type` and `format`.
+- **0.2.0**: optional step `category` and software `entry_point`; a data reference's `uri` may record where a
+  node of this hierarchy was when read; optional ontology terms: step `operations`, data reference `type` and
+  `format`.
 - **0.1.0**: first version.
 
 ## Survey of existing practice
