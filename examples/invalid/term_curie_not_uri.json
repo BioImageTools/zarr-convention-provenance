@@ -1,0 +1,13 @@
+{
+  "zarr_format": 3,
+  "node_type": "group",
+  "attributes": {
+    "zarr_conventions": [{ "uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenance:" }],
+    "provenance:steps": [
+      {
+        "software": { "name": "fractal-tasks-core", "version": "2.1.0" },
+        "inputs": [{ "path": "B/03/0", "type": { "uri": "data_2968", "label": "Image" } }]
+      }
+    ]
+  }
+}
