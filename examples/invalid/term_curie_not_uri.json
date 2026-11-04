@@ -6,7 +6,7 @@
     "provenance:steps": [
       {
         "software": { "name": "fractal-tasks-core", "version": "2.1.0" },
-        "inputs": [{ "path": "B/03/0", "type": { "iri": "data_2968", "label": "Image" } }]
+        "inputs": [{ "path": "B/03/0", "type": { "uri": "data_2968", "label": "Image" } }]
       }
     ]
   }

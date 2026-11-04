@@ -22,7 +22,7 @@
           "uri": "https://pypi.org/project/fractal-tasks-core/2.1.0"
         },
         "category_terms": [
-          { "iri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
+          { "uri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
         ],
         "parameters": {
           "channel": { "mode": "index", "identifier": "0" },
@@ -38,14 +38,14 @@
             "path": "B/03/0",
             "uri": "s3://bucket/plate.zarr/B/03/0",
             "name": "image",
-            "type": { "iri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
+            "type": { "uri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
           }
         ],
         "outputs": [
           {
             "path": "B/03/0/labels/nuclei",
             "name": "label image",
-            "type": { "iri": "http://purl.obolibrary.org/obo/OBI_0003360", "label": "image segmentation map", "ontology": "obi" }
+            "type": { "uri": "http://purl.obolibrary.org/obo/OBI_0003360", "label": "image segmentation map", "ontology": "obi" }
           },
           { "path": "B/03/0/tables/nuclei_masking_ROI_table", "name": "masking ROI table" }
         ],

@@ -20,7 +20,7 @@
           "uri": "https://github.com/glencoesoftware/bioformats2raw"
         },
         "category_terms": [
-          { "iri": "http://edamontology.org/operation_0335", "label": "Data formatting", "ontology": "edam" }
+          { "uri": "http://edamontology.org/operation_0335", "label": "Data formatting", "ontology": "edam" }
         ],
         "parameters": {
           "bioformats2raw_options": [
@@ -35,14 +35,14 @@
           {
             "id": "1e504844-2151-4ef8-b265-8273b7ca7082",
             "name": "image representation submitted by uploader",
-            "type": { "iri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
+            "type": { "uri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
           }
         ],
         "outputs": [
           {
             "id": "e849d58e-74e0-418b-8396-6bdd55f6aeb2",
-            "type": { "iri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" },
-            "format": { "iri": "http://edamontology.org/format_3915", "label": "Zarr", "ontology": "edam" }
+            "type": { "uri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" },
+            "format": { "uri": "http://edamontology.org/format_3915", "label": "Zarr", "ontology": "edam" }
           }
         ]
       }

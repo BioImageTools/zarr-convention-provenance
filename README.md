@@ -90,21 +90,21 @@ All properties are placed at the root `attributes` level using the key-prefixed 
         "category": "Segmentation",
         "software": { "name": "fractal-tasks-core", "version": "2.1.0" },
         "category_terms": [
-          { "iri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
+          { "uri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
         ],
         "parameters": { "segmentation_method": { "method": "Otsu" } },
         "inputs": [
           {
             "path": "B/03/0",
             "name": "image",
-            "type": { "iri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
+            "type": { "uri": "http://edamontology.org/data_2968", "label": "Image", "ontology": "edam" }
           }
         ],
         "outputs": [
           {
             "path": "B/03/0/labels/nuclei",
             "name": "label image",
-            "type": { "iri": "http://purl.obolibrary.org/obo/OBI_0003360", "label": "image segmentation map", "ontology": "obi" }
+            "type": { "uri": "http://purl.obolibrary.org/obo/OBI_0003360", "label": "image segmentation map", "ontology": "obi" }
           }
         ],
         "started": "2026-11-04T11:55:00+01:00",
@@ -190,27 +190,38 @@ image without knowing each tool's own step names. Terms can be looked up in the
 [EMBL-EBI Ontology Lookup Service (OLS)](https://www.ebi.ac.uk/ols4/).
 
 Ontology terms are nice-to-have: `category_terms`, `type` and `format` are all optional, and so is every field of a
-term. A writer that only knows a label can record just the label and add the IRI later.
+term. A writer that only knows a label can record just the label and add the URI later.
 
 | Field Name | Type   | Description                                                                                   |
 | ---------- | ------ | --------------------------------------------------------------------------------------------- |
-| iri        | string | Full IRI of the term, e.g. `http://edamontology.org/operation_3443`.                           |
+| uri        | string | Full URI of the term, e.g. `http://edamontology.org/operation_3443`.                           |
 | label      | string | The term's label in its ontology, e.g. `Image analysis`.                                       |
 | ontology   | string | The ontology's id in OLS, e.g. `edam`, `obi`, `ncit`.                                          |
 
-When an identifier is given, it should be the full IRI rather than a compact identifier (CURIE), because
+When an identifier is given, it should be the full URI rather than a compact identifier (CURIE), because
 prefixes are not used consistently: OLS itself shows the same EDAM term as `EDAM:operation_3434` and
-`EDAM_operation:3434`. If `iri` is present it must be a valid IRI.
+`EDAM_operation:3434`. If `uri` is present it must be a valid URI.
 
 Any ontology may be used. These are suggested:
 
 | Where                          | Ontology and branch                                                                  | Examples                                                                                                                                                                                       |
 | ------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Step `category_terms`          | [EDAM](https://www.ebi.ac.uk/ols4/ontologies/edam) operation, then [OBI](https://www.ebi.ac.uk/ols4/ontologies/obi) or [NCIT](https://www.ebi.ac.uk/ols4/ontologies/ncit) | [Image analysis](http://edamontology.org/operation_3443), [Data formatting](http://edamontology.org/operation_0335), [Feature extraction](http://edamontology.org/operation_3937), [image segmentation](http://purl.obolibrary.org/obo/OBI_0003918) (OBI), [Image Registration](http://purl.obolibrary.org/obo/NCIT_C80145) (NCIT) |
+| Step `category_terms`          | [EDAM](https://www.ebi.ac.uk/ols4/ontologies/edam) operation, then [OBI](https://www.ebi.ac.uk/ols4/ontologies/obi) or [NCIT](https://www.ebi.ac.uk/ols4/ontologies/ncit) | [Image analysis](http://edamontology.org/operation_3443), [Data formatting](http://edamontology.org/operation_0335), [Feature extraction](http://edamontology.org/operation_3937), [image segmentation](http://purl.obolibrary.org/obo/OBI_0003918) (OBI), [Cell Segmentation](http://purl.obolibrary.org/obo/NCIT_C224053) (NCIT), [Image Registration](http://purl.obolibrary.org/obo/NCIT_C80145) (NCIT) |
+| Step `category_terms`, deconvolution | [FBbi](https://www.ebi.ac.uk/ols4/ontologies/fbbi) computational method        | [3D-deconvolution](http://purl.obolibrary.org/obo/FBbi_00000357), [blind deconvolution](http://purl.obolibrary.org/obo/FBbi_00000362), [Wiener filter](http://purl.obolibrary.org/obo/FBbi_00000356) |
 | Data reference `type`          | EDAM data, then OBI                                                                  | [Image](http://edamontology.org/data_2968), [image segmentation map](http://purl.obolibrary.org/obo/OBI_0003360) (OBI)                                                                          |
 | Data reference `format`        | EDAM format                                                                          | [Zarr](http://edamontology.org/format_3915), [OME-TIFF](http://edamontology.org/format_3727), [TIFF](http://edamontology.org/format_3591)                                                       |
 
-A step MAY list several `category_terms`, for example a general EDAM term and a more specific OBI term.
+A step MAY list several `category_terms`, from one ontology or several, for example to give both a general and
+a more specific term. Their order carries no meaning. A cell segmentation step could record:
+
+```json
+"category": "Segmentation",
+"category_terms": [
+  { "uri": "http://edamontology.org/operation_3443", "label": "Image analysis", "ontology": "edam" },
+  { "uri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" },
+  { "uri": "http://purl.obolibrary.org/obo/NCIT_C224053", "label": "Cell Segmentation", "ontology": "ncit" }
+]
+```
 
 ### Extending
 

@@ -87,7 +87,7 @@
     "term": {
       "type": "object",
       "properties": {
-        "iri": { "type": "string", "format": "uri" },
+        "uri": { "type": "string", "format": "uri" },
         "label": { "type": "string", "minLength": 1 },
         "ontology": { "type": "string", "minLength": 1 }
       }
