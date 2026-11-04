@@ -21,7 +21,7 @@
           "entry_point": "fractal_tasks_core.tasks.threshold_segmentation",
           "uri": "https://pypi.org/project/fractal-tasks-core/2.1.0"
         },
-        "operations": [
+        "category_terms": [
           { "iri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
         ],
         "parameters": {

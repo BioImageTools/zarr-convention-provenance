@@ -19,7 +19,7 @@
           "version": "0.13.0-SNAPSHOT",
           "uri": "https://github.com/glencoesoftware/bioformats2raw"
         },
-        "operations": [
+        "category_terms": [
           { "iri": "http://edamontology.org/operation_0335", "label": "Data formatting", "ontology": "edam" }
         ],
         "parameters": {

@@ -89,7 +89,7 @@ All properties are placed at the root `attributes` level using the key-prefixed 
         "name": "Threshold Segmentation",
         "category": "Segmentation",
         "software": { "name": "fractal-tasks-core", "version": "2.1.0" },
-        "operations": [
+        "category_terms": [
           { "iri": "http://purl.obolibrary.org/obo/OBI_0003918", "label": "image segmentation", "ontology": "obi" }
         ],
         "parameters": { "segmentation_method": { "method": "Otsu" } },
@@ -129,22 +129,23 @@ All properties are placed at the root `attributes` level using the key-prefixed 
 
 One execution of one step: a conversion, a filter, a segmentation, a measurement.
 
-| Field Name  | Type                                               | Description                                                     |
-| ----------- | -------------------------------------------------- | --------------------------------------------------------------- |
-| software    | [Software Object](#software-object)                | **REQUIRED**. The software that performed the step.             |
-| name        | string                                             | What the step did, e.g. `Image conversion`.                      |
-| category    | string                                             | The kind of processing, e.g. `Segmentation`, `Conversion`.       |
-| description | string                                             | Free text about the step.                                       |
-| operations  | \[[Ontology Term Object](#ontology-term-object)]   | What kind of operation the step performed, e.g. segmentation.   |
-| parameters  | object                                             | Parameters the software ran with. Free-form.                    |
-| inputs      | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                             |
-| outputs     | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                     |
-| started     | string                                             | When the step started: ISO 8601 date-time with time zone.       |
-| ended       | string                                             | When the step ended: ISO 8601 date-time with time zone.         |
+| Field Name     | Type                                               | Description                                                        |
+| -------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| software       | [Software Object](#software-object)                | **REQUIRED**. The software that performed the step.                |
+| name           | string                                             | What the step did, e.g. `Image conversion`.                        |
+| category       | string                                             | The kind of processing, e.g. `Segmentation`, `Conversion`.         |
+| category_terms | \[[Ontology Term Object](#ontology-term-object)]   | The kind of processing as ontology terms, e.g. image segmentation. |
+| description    | string                                             | Free text about the step.                                          |
+| parameters     | object                                             | Parameters the software ran with. Free-form.                       |
+| inputs         | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                                |
+| outputs        | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                        |
+| started        | string                                             | When the step started: ISO 8601 date-time with time zone.          |
+| ended          | string                                             | When the step ended: ISO 8601 date-time with time zone.            |
 
 `category` groups steps across tools, so that a reader can find, say, every segmentation in a history without
-knowing each tool's step names. It is free text; to name the operation with a term from an ontology, use
-`operations` as well.
+knowing each tool's step names. It is free text. `category_terms` names the same kind of processing with terms
+from published ontologies, possibly at several levels of detail (for example a general EDAM term and a more
+specific OBI term), so that readers can match steps without agreeing on the free text.
 
 `parameters` SHOULD be recorded as the software received them, with defaults applied where the software can
 tell, so that the step can be repeated. A command-line tool MAY record its arguments as a list under one key
@@ -188,7 +189,7 @@ A term from a published ontology, so that readers can find, for example, every s
 image without knowing each tool's own step names. Terms can be looked up in the
 [EMBL-EBI Ontology Lookup Service (OLS)](https://www.ebi.ac.uk/ols4/).
 
-Ontology terms are nice-to-have: `operations`, `type` and `format` are all optional, and so is every field of a
+Ontology terms are nice-to-have: `category_terms`, `type` and `format` are all optional, and so is every field of a
 term. A writer that only knows a label can record just the label and add the IRI later.
 
 | Field Name | Type   | Description                                                                                   |
@@ -205,11 +206,11 @@ Any ontology may be used. These are suggested:
 
 | Where                          | Ontology and branch                                                                  | Examples                                                                                                                                                                                       |
 | ------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Step `operations`              | [EDAM](https://www.ebi.ac.uk/ols4/ontologies/edam) operation, then [OBI](https://www.ebi.ac.uk/ols4/ontologies/obi) or [NCIT](https://www.ebi.ac.uk/ols4/ontologies/ncit) | [Image analysis](http://edamontology.org/operation_3443), [Data formatting](http://edamontology.org/operation_0335), [Feature extraction](http://edamontology.org/operation_3937), [image segmentation](http://purl.obolibrary.org/obo/OBI_0003918) (OBI), [Image Registration](http://purl.obolibrary.org/obo/NCIT_C80145) (NCIT) |
+| Step `category_terms`          | [EDAM](https://www.ebi.ac.uk/ols4/ontologies/edam) operation, then [OBI](https://www.ebi.ac.uk/ols4/ontologies/obi) or [NCIT](https://www.ebi.ac.uk/ols4/ontologies/ncit) | [Image analysis](http://edamontology.org/operation_3443), [Data formatting](http://edamontology.org/operation_0335), [Feature extraction](http://edamontology.org/operation_3937), [image segmentation](http://purl.obolibrary.org/obo/OBI_0003918) (OBI), [Image Registration](http://purl.obolibrary.org/obo/NCIT_C80145) (NCIT) |
 | Data reference `type`          | EDAM data, then OBI                                                                  | [Image](http://edamontology.org/data_2968), [image segmentation map](http://purl.obolibrary.org/obo/OBI_0003360) (OBI)                                                                          |
 | Data reference `format`        | EDAM format                                                                          | [Zarr](http://edamontology.org/format_3915), [OME-TIFF](http://edamontology.org/format_3727), [TIFF](http://edamontology.org/format_3591)                                                       |
 
-A step MAY list several operations, for example a general EDAM term and a more specific OBI term.
+A step MAY list several `category_terms`, for example a general EDAM term and a more specific OBI term.
 
 ### Extending
 
@@ -223,7 +224,7 @@ new optional fields, major for incompatible changes. While the major version is 
 be incompatible.
 
 - **0.2.0**: optional step `category` and software `entry_point`; a data reference's `uri` may record where a
-  node of this hierarchy was when read; optional ontology terms: step `operations`, data reference `type` and
+  node of this hierarchy was when read; optional ontology terms: step `category_terms`, data reference `type` and
   `format`.
 - **0.1.0**: first version.
 
