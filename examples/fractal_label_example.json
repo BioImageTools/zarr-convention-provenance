@@ -14,9 +14,11 @@
     "provenance:steps": [
       {
         "name": "Threshold Segmentation",
+        "category": "Segmentation",
         "software": {
           "name": "fractal-tasks-core",
           "version": "2.1.0",
+          "entry_point": "fractal_tasks_core.tasks.threshold_segmentation",
           "uri": "https://pypi.org/project/fractal-tasks-core/2.1.0"
         },
         "parameters": {
@@ -28,7 +30,7 @@
             "post_process": [{ "type": "Size Filter", "min_size": 20 }]
           }
         },
-        "inputs": [{ "path": "B/03/0", "name": "image" }],
+        "inputs": [{ "path": "B/03/0", "uri": "s3://bucket/plate.zarr/B/03/0", "name": "image" }],
         "outputs": [
           { "path": "B/03/0/labels/nuclei", "name": "label image" },
           { "path": "B/03/0/tables/nuclei_masking_ROI_table", "name": "masking ROI table" }
