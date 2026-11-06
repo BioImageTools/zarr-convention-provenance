@@ -18,7 +18,7 @@ prefix at the root `attributes` level, following the
 Version 0.1 contained only what every surveyed producer already records (see
 [Survey](#survey-of-existing-practice)). Version 0.2 adds optional, nice-to-have [ontology terms](#ontology-term-object) for the
 kind of operation a step performed and the type and format of the data it read and wrote, and three optional step
-fields: `environment`, `runtime-dependencies` and `status`. The convention says
+fields: `environment`, `runtime_dependencies` and `status`. The convention says
 nothing about the image itself: axes, transforms, pyramids and labels belong to
 [OME-Zarr](https://ngff.openmicroscopy.org/), and licensing to the [license convention](https://github.com/clbarnes/zarr-convention-license). Every object here allows extra keys,
 so tools and later versions can add more without breaking validation.
@@ -142,7 +142,7 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 | inputs         | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                                |
 | outputs        | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                        |
 | environment    | [Data Reference Object](#data-reference-object)    | What the software ran in: a container image, lockfile or environment file, with its checksum. |
-| runtime-dependencies | \[[Software Object](#software-object)] | Code the software loaded at run time: plugins, readers, trained models. |
+| runtime_dependencies | \[[Software Object](#software-object)] | Code the software loaded at run time: plugins, readers, trained models. |
 | status         | string                                             | `ok` or `failed`.                                                  |
 | started        | string                                             | When the step started: ISO 8601 date-time with time zone.          |
 | ended          | string                                             | When the step ended: ISO 8601 date-time with time zone.            |
@@ -245,7 +245,7 @@ be incompatible.
 
 - **0.2.0**: optional step `category` and software `entry_point`; a data reference's `uri` may record where a
   node of this hierarchy was when read; optional ontology terms: step `category_terms`, data reference `type` and
-  `format`; optional step `environment`, `runtime-dependencies` and `status`.
+  `format`; optional step `environment`, `runtime_dependencies` and `status`.
 - **0.1.0**: first version.
 
 ## Survey of existing practice
@@ -267,7 +267,7 @@ add. Software name and version are required because every source has them.
 
 - `environment`: every surveyed producer runs in something it can name (a container image, a conda or pixi
   lockfile, a Nextflow profile); a data reference with a checksum covers all of them without a new object type.
-- `runtime-dependencies`: code loaded at run time that is not the tool itself, such as reader plugins (MIA snippets), Fractal
+- `runtime_dependencies`: code loaded at run time that is not the tool itself, such as reader plugins (MIA snippets), Fractal
   tasks, or trained models (Allen, Fractal; the working group's "runtime modules, DL models").
 - `status`: whether the step succeeded, so a verification step can say what it found (MIA check-stage; every
   workflow engine records an exit status).

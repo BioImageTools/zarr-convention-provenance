@@ -24,7 +24,7 @@
           "uri": "https://github.com/JaneliaSciComp/mia-snippets/blob/de4b985206c86137e2ddf1fe32617f0764b73cb9/harness/pixi.lock",
           "checksum": "sha256:80d86d8031892d3b3c606f80f984b6da39fd82bc53813683e350b9bc3a791beb"
         },
-        "runtime-dependencies": [
+        "runtime_dependencies": [
           { "name": "tiff-zip-glob-rgb", "version": "fc16a01cd2731655e34804e920722e747e3f4826",
             "uri": "https://github.com/JaneliaSciComp/mia-snippets" }
         ],
