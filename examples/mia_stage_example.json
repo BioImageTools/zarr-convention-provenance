@@ -48,7 +48,6 @@
         "name": "check-stage",
         "software": { "name": "mia-harness", "version": "de4b985206c86137e2ddf1fe32617f0764b73cb9" },
         "parameters": { "schemas_commit": "0.6" },
-        "status": "ok",
         "started": "2026-11-02T18:04:12Z",
         "ended": "2026-11-02T18:04:20Z"
       }
