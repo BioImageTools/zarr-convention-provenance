@@ -17,7 +17,8 @@ prefix at the root `attributes` level, following the
 
 Version 0.1 contained only what every surveyed producer already records (see
 [Survey](#survey-of-existing-practice)). Version 0.2 adds optional, nice-to-have [ontology terms](#ontology-term-object) for the
-kind of operation a step performed and the type and format of the data it read and wrote. The convention says
+kind of operation a step performed and the type and format of the data it read and wrote, and one optional step
+field: `environment`. The convention says
 nothing about the image itself: axes, transforms, pyramids and labels belong to
 [OME-Zarr](https://ngff.openmicroscopy.org/), and licensing to the [license convention](https://github.com/clbarnes/zarr-convention-license). Every object here allows extra keys,
 so tools and later versions can add more without breaking validation.
@@ -140,6 +141,7 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 | parameters     | object                                             | Parameters the software ran with. Free-form.                       |
 | inputs         | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                                |
 | outputs        | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                        |
+| environment    | [Data Reference Object](#data-reference-object)    | What the software ran in: a container image, lockfile or environment file, with its checksum. |
 | started        | string                                             | When the step started: ISO 8601 date-time with time zone.          |
 | ended          | string                                             | When the step ended: ISO 8601 date-time with time zone.            |
 
@@ -147,6 +149,12 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 knowing each tool's step names. It is free text. `category_terms` names the same kind of processing with terms
 from published ontologies, possibly at several levels of detail (for example a general EDAM term and a more
 specific OBI term), so that readers can match steps without agreeing on the free text.
+
+A step MAY list the node it wrote among its `outputs`, to carry that node's identifier in a catalogue or its
+checksum. A node that is checked or otherwise modified after it was written gets a further step appended. A step
+records what happened to the data, not how the computation went: a step that failed and wrote nothing is not part of
+the node's history, and a check that is recorded ran and passed. Exit codes, logs and failed attempts belong to the
+workflow engine.
 
 `parameters` SHOULD be recorded as the software received them, with defaults applied where the software can
 tell, so that the step can be repeated. A command-line tool MAY record its arguments as a list under one key
@@ -183,6 +191,10 @@ It MAY also carry a `uri`: the absolute location it had when the step ran, e.g.
 `s3://bucket/plate.zarr/B/03/0`, for a reader to trace where the data was. That `uri` is a record, not a
 reference: once the hierarchy has moved it can point to an old location, so a reader SHOULD resolve the node
 from its `path`.
+
+Code or model files a step loaded at run time that its `environment` does not pin, such as reader plugins, task
+scripts or trained weights, are inputs like any other: a `uri` pinned to a commit or release, a `checksum` when known,
+and a `name` that says what it is (`snippet`, `model`). The output depends on them exactly as it depends on the data.
 
 ### Ontology Term Object
 
@@ -237,7 +249,7 @@ be incompatible.
 
 - **0.2.0**: optional step `category` and software `entry_point`; a data reference's `uri` may record where a
   node of this hierarchy was when read; optional ontology terms: step `category_terms`, data reference `type` and
-  `format`.
+  `format`; optional step `environment`.
 - **0.1.0**: first version.
 
 ## Survey of existing practice
@@ -255,23 +267,30 @@ add. Software name and version are required because every source has them.
 | Start and end time        |                       |                        | `verification.time`                | `start_date_time`, `end_date_time` | yes                | `started`, `ended`        |
 | Outputs                   | (the node itself)     | (the node itself)      | `artifact`                         | `output_path`                      | yes                | `outputs`                 |
 
+### Added in 0.2
+
+- `environment`: every surveyed producer runs in something it can name (a container image, a conda or pixi
+  lockfile, a Nextflow profile); a data reference with a checksum covers all of them without a new object type.
+- Code loaded at run time that the environment does not pin (reader plugins, Fractal tasks, trained models: the
+  working group's "runtime modules, DL models") needs no field of its own: it is an input with a pinned `uri`.
+
 ## Deferred
 
 Recorded by some sources or asked for by the working group, but not yet agreed. Each is a candidate for a minor
 version, and can be written today as an extra key.
 
 - **Commit** separate from version (MIA, Allen, Fractal).
-- **Container or environment**: image, engine, digest; MIA's lockfile digest (MIA, Allen, Fractal).
 - **Workflow** the step ran in: name, version, uri (MIA, Allen, Fractal).
 - **Execution id**: UUID or workflow-engine task id (BIA, Fractal).
 - **Compute**: CPU, memory, GPU model and count (Allen, Fractal; working group).
-- **Models**: trained models loaded at run time (Allen, Fractal; working group).
 - **Manual steps**, e.g. proofreading, with the
   [BioImage Archive MIFA model](https://www.ebi.ac.uk/bioimage-archive/mifa-model-reference/) as vocabulary
   (working group).
 - **Scripts, logs and fuller records**, e.g. a Workflow Run RO-Crate (working group).
-- **Node identity and verification**: a recipe hash over inputs and parameters, and the result of checks run on
-  the written node (MIA).
+- **Node identity**: a recipe hash over inputs and parameters (MIA).
+- **Verification outcome and detail**: a status or quality flag on a check step, and which checks ran and what
+  each found (MIA). Kept out of 0.2 because a recorded step is one that ran and passed; a failed check should block
+  publication or is a quality flag, which is a different concept from provenance.
 
 Out of scope: license (license convention), people and funding (dataset-level metadata such as
 [Allen biodata-schema](https://github.com/AllenInstitute/biodata-schema)), image geometry (OME-Zarr).
