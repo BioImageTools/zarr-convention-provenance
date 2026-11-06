@@ -24,10 +24,6 @@
           "uri": "https://github.com/JaneliaSciComp/mia-snippets/blob/de4b985206c86137e2ddf1fe32617f0764b73cb9/harness/pixi.lock",
           "checksum": "sha256:80d86d8031892d3b3c606f80f984b6da39fd82bc53813683e350b9bc3a791beb"
         },
-        "runtime_dependencies": [
-          { "name": "tiff-zip-glob-rgb", "version": "fc16a01cd2731655e34804e920722e747e3f4826",
-            "uri": "https://github.com/JaneliaSciComp/mia-snippets" }
-        ],
         "parameters": {
           "plan": { "seed": 0, "patch": 128, "levels": [1, 2], "samples": { "train": 16, "val": 4, "test": 4 } },
           "voxel_size": { "z": { "nm": 1.0, "source": "synthetic" }, "y": { "nm": 106.0, "source": "record" },
@@ -38,6 +34,10 @@
           {
             "uri": "https://zenodo.org/records/6400327/files/DeepBacs_Data_Segmentation_Ecoli_stationary_phase.zip",
             "name": "train/brightfield/*.tif"
+          },
+          {
+            "uri": "https://github.com/JaneliaSciComp/mia-snippets/blob/fc16a01cd2731655e34804e920722e747e3f4826/snippets/tiff-zip-glob-rgb/snippet.py",
+            "name": "snippet"
           }
         ],
         "outputs": [{ "id": "27f07509df1d86c8", "name": "artifact" }],

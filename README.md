@@ -17,8 +17,8 @@ prefix at the root `attributes` level, following the
 
 Version 0.1 contained only what every surveyed producer already records (see
 [Survey](#survey-of-existing-practice)). Version 0.2 adds optional, nice-to-have [ontology terms](#ontology-term-object) for the
-kind of operation a step performed and the type and format of the data it read and wrote, and three optional step
-fields: `environment` and `runtime_dependencies`. The convention says
+kind of operation a step performed and the type and format of the data it read and wrote, and one optional step
+field: `environment`. The convention says
 nothing about the image itself: axes, transforms, pyramids and labels belong to
 [OME-Zarr](https://ngff.openmicroscopy.org/), and licensing to the [license convention](https://github.com/clbarnes/zarr-convention-license). Every object here allows extra keys,
 so tools and later versions can add more without breaking validation.
@@ -142,7 +142,6 @@ One execution of one step: a conversion, a filter, a segmentation, a measurement
 | inputs         | \[[Data Reference Object](#data-reference-object)] | Data the step read.                                                |
 | outputs        | \[[Data Reference Object](#data-reference-object)] | Data the step wrote, if not only this node.                        |
 | environment    | [Data Reference Object](#data-reference-object)    | What the software ran in: a container image, lockfile or environment file, with its checksum. |
-| runtime_dependencies | \[[Software Object](#software-object)] | Code the software loaded at run time: plugins, readers, trained models. |
 | started        | string                                             | When the step started: ISO 8601 date-time with time zone.          |
 | ended          | string                                             | When the step ended: ISO 8601 date-time with time zone.            |
 
@@ -192,6 +191,10 @@ It MAY also carry a `uri`: the absolute location it had when the step ran, e.g.
 `s3://bucket/plate.zarr/B/03/0`, for a reader to trace where the data was. That `uri` is a record, not a
 reference: once the hierarchy has moved it can point to an old location, so a reader SHOULD resolve the node
 from its `path`.
+
+Code or model files a step loaded at run time that its `environment` does not pin, such as reader plugins, task
+scripts or trained weights, are inputs like any other: a `uri` pinned to a commit or release, a `checksum` when known,
+and a `name` that says what it is (`snippet`, `model`). The output depends on them exactly as it depends on the data.
 
 ### Ontology Term Object
 
@@ -246,7 +249,7 @@ be incompatible.
 
 - **0.2.0**: optional step `category` and software `entry_point`; a data reference's `uri` may record where a
   node of this hierarchy was when read; optional ontology terms: step `category_terms`, data reference `type` and
-  `format`; optional step `environment` and `runtime_dependencies`.
+  `format`; optional step `environment`.
 - **0.1.0**: first version.
 
 ## Survey of existing practice
@@ -268,8 +271,8 @@ add. Software name and version are required because every source has them.
 
 - `environment`: every surveyed producer runs in something it can name (a container image, a conda or pixi
   lockfile, a Nextflow profile); a data reference with a checksum covers all of them without a new object type.
-- `runtime_dependencies`: code loaded at run time that is not the tool itself, such as reader plugins (MIA snippets), Fractal
-  tasks, or trained models (Allen, Fractal; the working group's "runtime modules, DL models").
+- Code loaded at run time that the environment does not pin (reader plugins, Fractal tasks, trained models: the
+  working group's "runtime modules, DL models") needs no field of its own: it is an input with a pinned `uri`.
 
 ## Deferred
 
